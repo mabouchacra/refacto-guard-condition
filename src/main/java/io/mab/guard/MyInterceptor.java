@@ -16,23 +16,23 @@ public class MyInterceptor {
         String smUserHeader = request.getHeader("sm_user");
         Cookie cookie = getTokenCookie(request, "jwt");
 
-        if(smUserHeader == null){
+        if(isNotAuthorized(smUserHeader)){
             return "NOT_AUTHORIZED";
-        }else{
-            if(smUserHeader.isEmpty()){
-                return "LOGIN";
-            }else{
-                if(cookie == null || cookie.getValue().isEmpty()){
-                    return "LOGIN";
-                }else{
-                    if(!cookie.getValue().equals(smUserHeader)){
-                        return "LOGIN";
-                    }
-                }
-            }
+        }
+
+        if (isLoginRequired(smUserHeader, cookie)) {
+            return "LOGIN";
         }
 
         return "OK";
+    }
+
+    private boolean isLoginRequired(String smUserHeader, Cookie cookie) {
+        return smUserHeader.isEmpty() || cookie == null || cookie.getValue().isEmpty() || !cookie.getValue().equals(smUserHeader);
+    }
+
+    private boolean isNotAuthorized(String smUserHeader) {
+        return smUserHeader == null;
     }
 
     private static Cookie getTokenCookie(HttpServletRequest request, String cookieName){
