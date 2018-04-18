@@ -8,12 +8,31 @@ import java.util.Arrays;
 
 public class MyInterceptor {
 
+    public static final String HEADER_SM_USER = "sm_user";
+    public static final String COOKIE_JWT_NAME = "jwt";
+
     public String preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
 
         String smUserHeader = request.getHeader("sm_user");
         Cookie cookie = getTokenCookie(request, "jwt");
 
-        return null;
+        if(smUserHeader == null){
+            return "NOT_AUTHORIZED";
+        }else{
+            if(smUserHeader.isEmpty()){
+                return "LOGIN";
+            }else{
+                if(cookie == null || cookie.getValue().isEmpty()){
+                    return "LOGIN";
+                }else{
+                    if(!cookie.getValue().equals(smUserHeader)){
+                        return "LOGIN";
+                    }
+                }
+            }
+        }
+
+        return "OK";
     }
 
     private static Cookie getTokenCookie(HttpServletRequest request, String cookieName){
